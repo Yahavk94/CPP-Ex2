@@ -2,22 +2,23 @@
 #include <string>
 using namespace std;
 
-int gender = 0; // 0 refers to mother and 1 refers to father
+#define UNDEFINED 2
+char gender = 0; // 0 refers to mother and 1 refers to father
 
 namespace family {
     class Node {
         friend class Tree;
     private:
+        char gender;
+        string name;
         Node* left; // Mother
         Node* right; // Father
-        Node* parent;
-        string name;
     public:
         Node(string name) {
+            this->gender = UNDEFINED;
+            this->name = name;
             this->left = nullptr;
             this->right = nullptr;
-            this->parent = nullptr;
-            this->name = name;
         }
     };
 
@@ -45,20 +46,27 @@ namespace family {
 
         string relation(const string name) const {
             int len = length(root, name);
+            switch (len) {
+                case -1:
+                    return "unrelated";
+                case 0:
+                    return "me";
+                case 1:
+                    if (gender == 0) return "mother";
+                    return "father";
+                default:
+                    string related = "";
+                    for (int i = 2; i < len; i++) related += "great-";
 
-            if (len == -1) return "unrelated";
-            if (len == 0) return "me";
-            if (len == 1) {
-                if (gender == 0) return "mother";
-                else return "father";
+                    if (gender == 0) related += "grandmother";
+                    else related += "grandfather";
+                    return related;
             }
+        }
 
-            string related = "";
-            for (int i = 2; i < len; i++) related += "great-";
-
-            if (gender == 0) related += "grandmother";
-            else related += "grandfather";
-            return related;
+        Tree& remove(const string name) {
+            remove(root, name);
+            return *this;
         }
 
     protected:
@@ -67,10 +75,19 @@ namespace family {
         void insert(Node** current, const string descendant, const string parent);
         void traversal(const Node* current) const;
         int length(const Node* current, const string name) const;
+        void remove(Node* current, const string name);
     };
 };
 
 using namespace family;
+
+void Tree::destroy(Node* current) {
+    if (current != nullptr) {
+        destroy(current->left);
+        destroy(current->right);
+        delete(current);
+    }
+}
 
 void Tree::insert(Node** current, const string descendant, const string parent) {
     if (*current != nullptr) {
@@ -78,7 +95,7 @@ void Tree::insert(Node** current, const string descendant, const string parent) 
             if (gender == 0) {
                 if ((*current)->left == nullptr) {
                     (*current)->left = new Node(parent);
-                    (*current)->left->parent = *current;
+                    (*current)->left->gender = 0;
                     return;
                 }
             }
@@ -86,7 +103,7 @@ void Tree::insert(Node** current, const string descendant, const string parent) 
             else if (gender == 1) {
                 if ((*current)->right == nullptr) {
                     (*current)->right = new Node(parent);
-                    (*current)->right->parent = *current;
+                    (*current)->right->gender = 1;
                     return;
                 }
             }
@@ -99,11 +116,11 @@ void Tree::insert(Node** current, const string descendant, const string parent) 
 
 void Tree::traversal(const Node* current) const {
     if (current != nullptr) {
-        cout << "Name: " + current->name << endl;
-        if (current->left != nullptr) cout << "Mother's name: " + current->left->name << endl;
-        else cout << "Mother's name: unknown" << endl;
-        if (current->right != nullptr) cout << "Father's name: " + current->right->name << endl;
-        else cout << "Father's name: unknown" << endl;
+        cout << current->name << endl;
+        if (current->left != nullptr) cout << "Mother's name is " + current->left->name << endl;
+        else cout << "Mother's name is unknown" << endl;
+        if (current->right != nullptr) cout << "Father's name is " + current->right->name << endl;
+        else cout << "Father's name is unknown" << endl;
         cout << endl;
 
         traversal(current->left);
@@ -116,13 +133,8 @@ int Tree::length(const Node* current, const string name) const {
 
 	int len = -1;
 	if (current->name == name) {
-        if (current->parent == nullptr) return 0; // The length of the path to the root is 0.
-            
-        if (current->parent->left != nullptr) { // Check mother's existence
-            if (current->parent->left->name == name) gender = 0;
-            else gender = 1;
-        }
-
+        if (current->gender == UNDEFINED) return 0;
+        if (current->gender == 0) gender = 0;
         else gender = 1;
         return len + 1;
     }
@@ -133,10 +145,27 @@ int Tree::length(const Node* current, const string name) const {
 	return len;
 }
 
-void Tree::destroy(Node* current) {
+void Tree::remove(Node* current, const string name) {
     if (current != nullptr) {
-        destroy(current->left);
-        destroy(current->right);
-        delete(current);
+        if (current->left != nullptr) {
+            if (current->left->name == name) {
+                Node* rem = current->left;
+                current->left = nullptr;
+                destroy(rem);
+                return;
+            }
+        }
+
+        else if (current->right != nullptr) {
+            if (current->right->name == name) {
+                Node* rem = current->right;
+                current->right = nullptr;
+                destroy(rem);
+                return;
+            }
+        }
+
+        remove(current->left, name);
+        remove(current->right, name);
     }
 }

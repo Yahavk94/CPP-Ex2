@@ -29,15 +29,16 @@ int main() {
 	cout << T.relation("xyz") << endl; // Prints "unrelated"
 	cout << T.relation("Yosef") << endl; // Prints "me"
 
-	cout << T.find("mother") << endl; // Prints "Rachel"
+	/*cout << T.find("mother") << endl; // Prints "Rachel"
 	cout << T.find("great-great-grandfather") << endl; // Prints "Avraham"
 	try {
 		cout << T.find("uncle") << endl; // Throws an exception
 	} catch (const exception& ex) {
 	 	cout << ex.what() << endl; // Prints "The tree cannot handle the 'uncle' relation"
-	}
+	}*/
 
 	T.remove("Avraham"); // Removes Avraham and Terah
 	cout << T.relation("Terah") << endl; // Prints "unrelated"
+	
     return 0;
 }
