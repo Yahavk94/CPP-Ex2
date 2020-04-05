@@ -2,7 +2,7 @@
 #include <string>
 using namespace std;
 
-#define UNDEFINED 2
+#define EMPTY 2
 char gender = 0; // 0 refers to mother and 1 refers to father
 
 namespace family {
@@ -15,7 +15,7 @@ namespace family {
         Node* right; // Father
     public:
         Node(string name) {
-            this->gender = UNDEFINED;
+            this->gender = EMPTY;
             this->name = name;
             this->left = nullptr;
             this->right = nullptr;
@@ -46,21 +46,16 @@ namespace family {
 
         string relation(const string name) const {
             int len = length(root, name);
-            switch (len) {
-                case -1:
-                    return "unrelated";
-                case 0:
-                    return "me";
-                case 1:
-                    if (gender == 0) return "mother";
-                    return "father";
-                default:
-                    string related = "";
-                    for (int i = 2; i < len; i++) related += "great-";
-
-                    if (gender == 0) related += "grandmother";
-                    else related += "grandfather";
-                    return related;
+            if (len == -1) return "unrelated";
+            else if (len == 0) return "me";
+            else if (len == 1) return gender == 0 ? "mother" : "father";
+            else {
+                string related = "";
+                for (int i = 2; i < len; i++)
+                    related += "great-";
+                if (gender == 0) related += "grandmother";
+                else related += "grandfather";
+                return related;
             }
         }
 
@@ -133,7 +128,7 @@ int Tree::length(const Node* current, const string name) const {
 
 	int len = -1;
 	if (current->name == name) {
-        if (current->gender == UNDEFINED) return 0;
+        if (current->gender == EMPTY) return 0;
         if (current->gender == 0) gender = 0;
         else gender = 1;
         return len + 1;
