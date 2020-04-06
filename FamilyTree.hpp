@@ -1,21 +1,40 @@
 #include <iostream>
 #include <string>
+#include <bits/stdc++.h>
+#include <queue>
 using namespace std;
 
+#define FEMALE 0
+#define MALE 1
 #define EMPTY 2
-char gender = 0; // 0 refers to mother and 1 refers to father
+char gender = 0; // 0 refers to a mother and 1 refers to a father
+char flag = 0; // For indication purposes
+
+class MyException : public exception {
+private:
+    string msg;
+public:
+    MyException(string msg) {this->msg = msg;}
+    ~MyException() {}
+    virtual const char* what() const throw() {
+        return msg.c_str();
+    }
+};
 
 namespace family {
     class Node {
         friend class Tree;
     private:
         char gender;
+        int height;
         string name;
         Node* left; // Mother
         Node* right; // Father
     public:
+        Node() {}
         Node(string name) {
             this->gender = EMPTY;
+            this->height = 0;
             this->name = name;
             this->left = nullptr;
             this->right = nullptr;
@@ -24,55 +43,140 @@ namespace family {
 
     class Tree {
     public:
-        Tree() {root = nullptr;} // Constructor
-        Tree(string name) {root = new Node(name);} // Constructor
-        ~Tree() {destroy(root);} /* Destructor
-        Can there be more than one destructor in a class?
-        No! There can only one destructor in a class, no parameters and no return type. */
+        /**
+         * Constructors.
+         * Can there be more than one constructor in a class?
+         * Yes! we can have more than one constructor, as long as each has a different list 
+         * of argument.
+         */
+        Tree() {root = nullptr;}
+        Tree(string name) {root = new Node(name);}
 
+        /**
+         * A destructor.
+         * Can there be more than one destructor in a class?
+         * No! There can only one destructor in a class, no parameters and no return type.
+         */
+        ~Tree() {destroy(root);} // destroy is a protected method
+
+        /**
+         * Given any name refers to a mother, this method returns the tree after adding
+         * her name as the left node of the given descendant.
+         * NOTE that an exception would be thrown in case of descendant's nonexistence or 
+         * mother's existence.
+         */
         Tree& addMother(const string descendant, const string parent) {
-            gender = 0;
-            insert(&root, descendant, parent);
-            return *this;
+            flag = 0;
+            gender = FEMALE;
+            insert(&root, descendant, parent); // A protected method
+            if (flag == 1) return *this;
+            throw MyException("ERROR! addMother failed due to descendant's nonexistence");
         }
 
+        /**
+         * Given any name refers to a father, this method returns the tree after adding
+         * his name as the right node of the given descendant.
+         * NOTE that an exception would be thrown in case of descendant's nonexistence or 
+         * father's existence.
+         */
         Tree& addFather(const string descendant, const string parent) {
-            gender = 1;
-            insert(&root, descendant, parent);
-            return *this;
+            flag = 0;
+            gender = MALE;
+            insert(&root, descendant, parent); // A protected method
+            if (flag == 1) return *this;
+            throw MyException("ERROR! addFather failed due to descendant's nonexistence");
         }
 
-        void display() const {traversal(root);}
+        /**
+         * This method displays the tree in a human friendly format.
+         */
+        void display() const {traversal(root);} // traversal is a protected method
 
+        /**
+         * This method returns the relation between the root and any given name.
+         */
         string relation(const string name) const {
-            int len = length(root, name);
-            if (len == -1) return "unrelated";
-            else if (len == 0) return "me";
-            else if (len == 1) return gender == 0 ? "mother" : "father";
-            else {
-                string related = "";
-                for (int i = 2; i < len; i++)
-                    related += "great-";
-                if (gender == 0) related += "grandmother";
-                else related += "grandfather";
-                return related;
+            int len = length(root, name); // A protected method
+            if (len == -1) return "unrelated"; // No relation found
+            if (len == 0) return "me";
+            if (len == 1) return gender == FEMALE ? "mother" : "father";
+            /* if (len > 1) */ string related = "";
+            for (int i = 2; i < len; i++) related += "great-"; // Holds if len is greater than 2
+            return gender == FEMALE ? related += "grandmother" : related += "grandfather";
+        }
+
+        /**
+         * This method finds and returns the name of any given relation.
+         * NOTE that an exception would be thrown in case the tree cannot handle the 
+         * given relation.
+         */
+        string find(const string relation) const {
+            vector<string> tokens;
+            stringstream check1(relation);
+            string intermediate;
+            while (getline(check1, intermediate, '-')) // Tokenizing a string
+                tokens.push_back(intermediate);
+            
+            int count = 0;
+            int i = 0;
+            while (i < tokens.size() - 1) { // For counting purpose
+                if (tokens[i] != "great") throw MyException("ERROR! invalid input");
+                count++;
+                i++;
             }
+
+            i = tokens.size() - 1; // Identify the relation type
+            string r;
+
+            if (tokens[i] == "mother") {
+                if (count > 0) throw MyException("Cannot handle the specified relation");
+                gender = FEMALE;
+                r = BFS(root, relation, 1);
+            }
+
+            else if (tokens[i] == "father") {
+                if (count > 0) throw MyException("Cannot handle the specified relation");
+                gender = MALE;
+                r = BFS(root, relation, 1);
+            }
+
+            else if (tokens[i] == "grandmother") {
+                gender = FEMALE;
+                r = BFS(root, relation, count + 2);
+            }
+
+            else if (tokens[i] == "grandfather") {
+                gender = MALE;
+                r = BFS(root, relation, count + 2);
+            }
+
+            else throw MyException("Cannot handle the specified relation");
+
+            if (r != "") return r;
+            else throw MyException("ERROR! invalid input");
         }
 
+        /**
+         * Given any name, this method returns the tree after removing it and 
+         * it's descendants.
+         */
         Tree& remove(const string name) {
-            remove(root, name);
-            return *this;
+            flag = 0;
+            remove(root, name); // A protected method
+            if (flag == 1) return *this;
+            throw MyException("ERROR! remove method failed due to name's nonexistence");
         }
 
-    protected:
+    protected: // Can be called by any subclass within its class, but not by unreleated classes.
         Node* root;
         void destroy(Node* current);
         void insert(Node** current, const string descendant, const string parent);
         void traversal(const Node* current) const;
         int length(const Node* current, const string name) const;
         void remove(Node* current, const string name);
-    };
-};
+        string BFS(Node* current, const string relation, const int count) const;
+    }; // class Tree
+}; // namespace family
 
 using namespace family;
 
@@ -86,21 +190,29 @@ void Tree::destroy(Node* current) {
 
 void Tree::insert(Node** current, const string descendant, const string parent) {
     if (*current != nullptr) {
-        if ((*current)->name == descendant) {
-            if (gender == 0) {
-                if ((*current)->left == nullptr) {
+        if ((*current)->name == descendant) { // Match found
+            if (gender == FEMALE) {
+                if ((*current)->left == nullptr) { // Check mother's nonexistence
                     (*current)->left = new Node(parent);
-                    (*current)->left->gender = 0;
+                    (*current)->left->gender = FEMALE;
+                    (*current)->left->height = 1 + (*current)->height;
+                    flag = 1; // Has been successfully added
                     return;
                 }
+
+                else throw MyException("ERROR! addMother failed since a mother already exists");
             }
 
-            else if (gender == 1) {
-                if ((*current)->right == nullptr) {
+            else if (gender == 1) { // Refers to a father
+                if ((*current)->right == nullptr) { // Check father's nonexistence
                     (*current)->right = new Node(parent);
-                    (*current)->right->gender = 1;
+                    (*current)->right->gender = MALE;
+                    (*current)->right->height = 1 + (*current)->height;
+                    flag = 1; // Has been successfully added
                     return;
                 }
+
+                else throw MyException("ERROR! addFather failed since a father already exists");
             }
         }
 
@@ -111,11 +223,12 @@ void Tree::insert(Node** current, const string descendant, const string parent) 
 
 void Tree::traversal(const Node* current) const {
     if (current != nullptr) {
+        // Print the specified node and it's parents names
         cout << current->name << endl;
         if (current->left != nullptr) cout << "Mother's name is " + current->left->name << endl;
-        else cout << "Mother's name is unknown" << endl;
+        else cout << "Mother's name is unknown" << endl; // Print unknown in case of nonexistence
         if (current->right != nullptr) cout << "Father's name is " + current->right->name << endl;
-        else cout << "Father's name is unknown" << endl;
+        else cout << "Father's name is unknown" << endl; // Print unknown in case of nonexistence
         cout << endl;
 
         traversal(current->left);
@@ -127,10 +240,10 @@ int Tree::length(const Node* current, const string name) const {
 	if (current == nullptr) return -1;
 
 	int len = -1;
-	if (current->name == name) {
-        if (current->gender == EMPTY) return 0;
-        if (current->gender == 0) gender = 0;
-        else gender = 1;
+	if (current->name == name) { // Match found
+        if (current->gender == EMPTY) return 0; // Refers to the root
+        if (current->gender == FEMALE) gender = FEMALE;
+        else gender = MALE;
         return len + 1;
     }
 
@@ -145,8 +258,9 @@ void Tree::remove(Node* current, const string name) {
         if (current->left != nullptr) {
             if (current->left->name == name) {
                 Node* rem = current->left;
-                current->left = nullptr;
-                destroy(rem);
+                current->left = nullptr; // Update
+                destroy(rem); // Free memory
+                flag = 1; // Has been removed successfully
                 return;
             }
         }
@@ -154,8 +268,9 @@ void Tree::remove(Node* current, const string name) {
         else if (current->right != nullptr) {
             if (current->right->name == name) {
                 Node* rem = current->right;
-                current->right = nullptr;
-                destroy(rem);
+                current->right = nullptr; // Update
+                destroy(rem); // Free memory
+                flag = 1; // Has been removed successfully
                 return;
             }
         }
@@ -163,4 +278,23 @@ void Tree::remove(Node* current, const string name) {
         remove(current->left, name);
         remove(current->right, name);
     }
+}
+
+string Tree::BFS(Node* current, const string relation, const int count) const {
+    if (current == nullptr) return "";
+
+    queue<Node*> nodes; // Level order traversal
+    nodes.push(current);
+    while (!nodes.empty()) {
+        if (nodes.front()->height > count) return ""; // Limit
+        else if (nodes.front()->height == count) {
+            if (nodes.front()->gender == gender) return nodes.front()->name;
+        }
+
+        if (nodes.front()->left != nullptr) nodes.push(nodes.front()->left);
+        if (nodes.front()->right != nullptr) nodes.push(nodes.front()->right);
+        nodes.pop();
+    }
+
+    return "";
 }
