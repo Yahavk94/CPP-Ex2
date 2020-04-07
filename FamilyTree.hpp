@@ -208,7 +208,7 @@ void Tree::insert(Node** current, const string descendant, const string parent) 
                     (*current)->left = new Node(parent);
                     (*current)->left->gender = FEMALE;
                     (*current)->left->height = 1 + (*current)->height;
-                    flag = 1;
+                    flag = 1; // Added
                     return;
                 }
 
@@ -220,7 +220,7 @@ void Tree::insert(Node** current, const string descendant, const string parent) 
                     (*current)->right = new Node(parent);
                     (*current)->right->gender = MALE;
                     (*current)->right->height = 1 + (*current)->height;
-                    flag = 1;
+                    flag = 1; // Added
                     return;
                 }
 
@@ -272,7 +272,7 @@ void Tree::remove(Node** current, const string name) {
                 Node* rem = (*current)->left;
                 (*current)->left = nullptr; // Update
                 destroy(rem); // Free memory
-                flag = 1;
+                flag = 1; // Removed
                 return;
             }
         }
@@ -282,7 +282,7 @@ void Tree::remove(Node** current, const string name) {
                 Node* rem = (*current)->right;
                 (*current)->right = nullptr; // Update
                 destroy(rem); // Free memory
-                flag = 1;
+                flag = 1; // Removed
                 return;
             }
         }
@@ -296,7 +296,7 @@ string Tree::limitedBFS(Node* current, const int height) const {
     queue<Node*> nodes;
     nodes.push(current);
     while (!nodes.empty()) {
-        if (nodes.front()->height > height) throw MyException("There is no such relation in the tree");
+        if (nodes.front()->height > height) throw MyException("No relation found");
         if (nodes.front()->height == height) {
             if (nodes.front()->gender == gender) return nodes.front()->name;
         }
@@ -306,5 +306,5 @@ string Tree::limitedBFS(Node* current, const int height) const {
         nodes.pop();
     }
 
-    throw MyException("There is no such relation in the tree");
+    throw MyException("No relation found");
 }
