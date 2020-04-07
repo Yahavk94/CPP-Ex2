@@ -39,6 +39,5 @@ int main() {
 
 	T.remove("Avraham"); // Removes Avraham and Terah
 	cout << T.relation("Terah") << endl; // Prints "unrelated"
-	
-    return 0;
+	return 0;
 }
