@@ -221,8 +221,8 @@ const int Tree::length(const Node* current, const std::string name) const {
 
     else if ((len = length(current->left, name)) >= 0 || (len = length(current->right, name)) >= 0)
         return len + 1;
-
-	return len;
+    
+    return len;
 }
 
 void Tree::remove(Node** current, const std::string name) {
