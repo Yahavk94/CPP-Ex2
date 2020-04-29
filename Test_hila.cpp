@@ -1,21 +1,19 @@
+#include <string>
 #include "doctest.h"
 #include "FamilyTree.hpp"
 
+using namespace std;
 using namespace family;
 
-#include <string>
-using namespace std;
-
 TEST_CASE("Test 1 addFather & addMother & relation") {
-
-    Tree T ("Shalom");
+    Tree T("Shalom");
     T.addFather("Shalom", "Aharon").addMother("Shalom", "Yafa");
 
     CHECK(T.relation("Shalom") == string("me"));
     CHECK(T.relation("Aharon") == string("father"));
     CHECK(T.relation("Yafa") == string("mother"));
 
-    CHECK_THROWS(T.addFather("Shalom", "Yosef")); //Shalom already has a father
+    CHECK_THROWS(T.addFather("Shalom", "Yosef"));
     CHECK_THROWS(T.addMother("Shalom", "Meri"));
 
     T.addMother("Yafa", "Ahuva").addMother("Ahuva", "Miriam");
@@ -24,7 +22,7 @@ TEST_CASE("Test 1 addFather & addMother & relation") {
     CHECK(T.relation("Miriam") == string("great-grandmother"));
     CHECK_THROWS(T.addMother("Yafa", "Michal"));
     CHECK_THROWS(T.addMother("Ahuva", "Michal"));
-    CHECK_THROWS(T.addFather("Sason", "Yaakov")); //Sason is not on the tree
+    CHECK_THROWS(T.addFather("Sason", "Yaakov"));
 
     T.addFather("Yafa", "Avi").addFather("Aharon", "Yigal").addMother("Aharon", "Nira");
 

@@ -6,6 +6,7 @@
 #include "doctest.h"
 #include "FamilyTree.hpp"
 #include <string>
+using namespace std;
 
 
 using namespace family;

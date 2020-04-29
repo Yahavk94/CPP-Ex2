@@ -1,10 +1,10 @@
 #!make -f
 
-CXX=clang++-9 
-CXXFLAGS=-std=c++2a
+CXX = clang++-9 
+CXXFLAGS = -std=c++2a
 
-HEADERS=FamilyTree.hpp
-OBJECTS=FamilyTree.o
+HEADERS = FamilyTree.hpp
+OBJECTS = FamilyTree.o
 
 run: test
 	./$^

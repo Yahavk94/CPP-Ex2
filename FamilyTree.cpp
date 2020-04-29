@@ -1,27 +1,21 @@
-#include <string>
-#include <bits/stdc++.h>
-#include <queue>
 #include "FamilyTree.hpp"
 
-#define FEMALE 0
-#define MALE 1
-#define EMPTY 2
-char gender = 0; // 0 refers to a mother and 1 refers to a father
-char flag = 0; // For indication purposes
+char gender = 0;
+char flag = 0;
 
-class MyException : public exception {
-private:
-    string msg;
-public:
-    MyException(string msg) {this->msg = msg;}
-    ~MyException() {}
-    virtual const char* what() const throw() {
-        return msg.c_str();
-    }
-};
+/**
+ * 04-2020
+ * @author Yahav Karpel
+ */
 
 namespace family {
-    Node::Node(string name) {
+    /**
+     * Node and Tree constructors.
+     * Can there be more than one constructor in a class?
+     * Yes! We can have more than one constructor, as long as each has a different list 
+     * of argument.
+     */
+    Node::Node(std::string name) {
         this->gender = EMPTY;
         this->height = 0;
         this->name = name;
@@ -29,18 +23,25 @@ namespace family {
         this->right = nullptr;
     }
 
-    Tree::Tree() {root = nullptr;}
-    Tree::Tree(string name) {
+    Tree::Tree(std::string name) {
         if (name == "") throw MyException("ERROR! the input must be a non-empty string");
         root = new Node(name);
     }
 
+    /**
+     * Node and Tree destructors.
+     * Can there be more than one destructor in a class?
+     * No! There can only one destructor in a class, no parameters and no return type.
+     */
+    Node::~Node() {}
     Tree::~Tree() {destroy(&root);}
 
-    Tree& Tree::addMother(const string descendant, const string parent) {
-        if (root == nullptr) throw MyException("ERROR! addMother method failed since the given tree is empty");
+    /**
+     * addMother method implementation.
+     */
+    Tree& Tree::addMother(const std::string descendant, const std::string parent) {
+        if (root == nullptr) throw MyException("ERROR! addMother method failed due to an empty tree");
         if (descendant == "" | parent == "") throw MyException("ERROR! the input must be a non-empty string");
-
         flag = 0;
         gender = FEMALE;
         insert(&root, descendant, parent); // A protected method
@@ -48,10 +49,12 @@ namespace family {
         throw MyException("ERROR! addMother method failed due to descendant's non-existence");
     }
 
-    Tree& Tree::addFather(const string descendant, const string parent) {
-        if (root == nullptr) throw MyException("ERROR! addFather method failed since the given tree is empty");
+    /**
+     * addFather method implementation.
+     */
+    Tree& Tree::addFather(const std::string descendant, const std::string parent) {
+        if (root == nullptr) throw MyException("ERROR! addFather method failed due to an empty tree");
         if (descendant == "" | parent == "") throw MyException("ERROR! the input must be a non-empty string");
-
         flag = 0;
         gender = MALE;
         insert(&root, descendant, parent); // A protected method
@@ -59,32 +62,41 @@ namespace family {
         throw MyException("ERROR! addFather failed due to descendant's non-existence");
     }
 
+    /**
+     * display method implementation.
+     */
     void Tree::display() const {
-        if (root == nullptr) cout << "The tree is empty" << endl;
+        if (root == nullptr) std::cout << "The tree is empty" << std::endl;
         else traversal(root); // A protected method
     }
 
-    string Tree::relation(const string name) const {
-        if (root == nullptr) throw MyException("ERROR! relation method failed since the given tree is empty");
+    /**
+     * relation method implementation.
+     */
+    const std::string Tree::relation(const std::string name) const {
+        if (root == nullptr) throw MyException("ERROR! relation method failed due to an empty tree");
         if (name == "") throw MyException("ERROR! the input must be a non-empty string");
 
         int len = length(root, name); // A protected method
         if (len == -1) return "unrelated"; // No relation found
         if (len == 0) return "me";
         if (len == 1) return gender == FEMALE ? "mother" : "father";
-        /* if (len > 1) */ string related = "";
+        /* if (len > 1) */ std::string related = "";
         for (int i = 2; i < len; i++) related += "great-"; // Holds if len is greater than 2
         return gender == FEMALE ? related += "grandmother" : related += "grandfather";
     }
 
-    string Tree::find(const string relation) const {
-        if (root == nullptr) throw MyException("ERROR! find method failed since the given tree is empty");
+    /**
+     * find method implementation.
+     */
+    const std::string Tree::find(const std::string relation) const {
+        if (root == nullptr) throw MyException("ERROR! find method failed due to an empty tree");
         if (relation == "") throw MyException("ERROR! the input must be a non-empty string");
 
-        vector<string> tokens;
-        stringstream check1(relation);
-        string intermediate;
-        while (getline(check1, intermediate, '-')) // Tokenizing a string
+        std::vector<std::string> tokens;
+        std::stringstream check1(relation);
+        std::string intermediate;
+        while (std::getline(check1, intermediate, '-')) // Tokenizing a string
             tokens.push_back(intermediate);
             
         int height = 0;
@@ -99,12 +111,12 @@ namespace family {
         if (tokens[i] == "me") return root->name; // The tree is non-empty
 
         else if (tokens[i] == "mother") {
-            if (root->left == nullptr) throw MyException("No relation found");
+            if (root->left == nullptr) throw MyException("No relation has found");
             return root->left->name;
         }
 
         else if (tokens[i] == "father") {
-            if (root->right == nullptr) throw MyException("No relation found");
+            if (root->right == nullptr) throw MyException("No relation has found");
             return root->right->name;
         }
 
@@ -121,8 +133,11 @@ namespace family {
         else throw MyException("Cannot handle the specified relation");
     }
 
-    Tree& Tree::remove(const string name) {
-        if (root == nullptr) throw MyException("ERROR! remove method failed since the given tree is empty");
+    /**
+     * remove method implementation.
+     */
+    Tree& Tree::remove(const std::string name) {
+        if (root == nullptr) throw MyException("ERROR! remove method failed due to an empty tree");
         if (name == "") throw MyException("ERROR! the input must be a non-empty string");
 
         if (root->name == name) // The tree is non-empty
@@ -133,7 +148,7 @@ namespace family {
         if (flag == 1) return *this;
         throw MyException("ERROR! remove method failed due to name's non-existence");
     }
-};
+}; // namespace family
 
 using namespace family;
 
@@ -145,7 +160,7 @@ void Tree::destroy(Node** current) {
     }
 }
 
-void Tree::insert(Node** current, const string descendant, const string parent) {
+void Tree::insert(Node** current, const std::string descendant, const std::string parent) {
     if (*current != nullptr) {
         if ((*current)->name == descendant) { // Match found
             if (gender == FEMALE) {
@@ -181,19 +196,19 @@ void Tree::insert(Node** current, const string descendant, const string parent) 
 void Tree::traversal(const Node* current) const {
     if (current != nullptr) {
         // Print the specified node and it's parents names
-        cout << current->name << endl;
-        if (current->left != nullptr) cout << "Mother's name is " + current->left->name << endl;
-        else cout << "Mother's name is unknown" << endl; // Print unknown in case of non-existence
-        if (current->right != nullptr) cout << "Father's name is " + current->right->name << endl;
-        else cout << "Father's name is unknown" << endl; // Print unknown in case of non-existence
-        cout << endl;
+        std::cout << current->name << std::endl;
+        if (current->left != nullptr) std::cout << "Mother's name is " + current->left->name << std::endl;
+        else std::cout << "Mother's name is unknown" << std::endl; // Print unknown in case of non-existence
+        if (current->right != nullptr) std::cout << "Father's name is " + current->right->name << std::endl;
+        else std::cout << "Father's name is unknown" << std::endl; // Print unknown in case of non-existence
+        std::cout << std::endl;
 
         traversal(current->left);
         traversal(current->right);
     }
 }
 
-int Tree::length(const Node* current, const string name) const {
+const int Tree::length(const Node* current, const std::string name) const {
 	if (current == nullptr) return -1;
 
 	int len = -1;
@@ -210,7 +225,7 @@ int Tree::length(const Node* current, const string name) const {
 	return len;
 }
 
-void Tree::remove(Node** current, const string name) {
+void Tree::remove(Node** current, const std::string name) {
     if (*current != nullptr) {
         if ((*current)->left != nullptr) {
             if ((*current)->left->name == name) {
@@ -237,11 +252,11 @@ void Tree::remove(Node** current, const string name) {
     }
 }
 
-string Tree::limitedBFS(Node* current, const int height) const {
-    queue<Node*> nodes;
+const std::string Tree::limitedBFS(Node* current, const int height) const {
+    std::queue<Node*> nodes;
     nodes.push(current); // The tree is non-empty
     while (!nodes.empty()) {
-        if (nodes.front()->height > height) throw MyException("No relation found");
+        if (nodes.front()->height > height) /* height = limit */ throw MyException("No relation has found");
         if (nodes.front()->height == height) {
             if (nodes.front()->gender == gender) return nodes.front()->name;
         }
@@ -251,5 +266,5 @@ string Tree::limitedBFS(Node* current, const int height) const {
         nodes.pop();
     }
 
-    throw MyException("No relation found");
+    throw MyException("No relation has found");
 }
