@@ -209,9 +209,9 @@ void Tree::traversal(const Node* current) const {
 }
 
 const int Tree::length(const Node* current, const std::string name) const {
-	if (current == nullptr) return -1;
+    if (current == nullptr) return -1;
 
-	int len = -1;
+    int len = -1;
     if (current->name == name) { // Match found
         if (current->gender == EMPTY) return 0; // Refers to the root
         if (current->gender == FEMALE) gender = FEMALE;
