@@ -1,12 +1,12 @@
-#pragma once
-
-#include <string>
-#include <iostream>
-
 /**
  * 04-2020
  * @author Yahav Karpel
  */
+
+#pragma once
+
+#include <string>
+#include <iostream>
 
 namespace family {
     class Node {

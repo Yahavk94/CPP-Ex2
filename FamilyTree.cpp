@@ -1,19 +1,19 @@
-#include "FamilyTree.hpp"
-
-char gender = 0;
-char flag = 0;
-
 /**
  * 04-2020
  * @author Yahav Karpel
  */
+
+#include "FamilyTree.hpp"
+
+char gender = 0;
+char flag = 0;
 
 namespace family {
     /**
      * Node and Tree constructors.
      * Can there be more than one constructor in a class?
      * Yes! We can have more than one constructor, as long as each has a different list 
-     * of argument.
+     * of arguments.
      */
     Node::Node(std::string name) {
         this->gender = EMPTY;
@@ -78,7 +78,7 @@ namespace family {
         if (name == "") throw MyException("ERROR! the input must be a non-empty string");
 
         int len = length(root, name); // A protected method
-        if (len == -1) return "unrelated"; // No relation found
+        if (len == -1) return "unrelated"; // No relation has found
         if (len == 0) return "me";
         if (len == 1) return gender == FEMALE ? "mother" : "father";
         /* if (len > 1) */ std::string related = "";
@@ -162,9 +162,9 @@ void Tree::destroy(Node** current) {
 
 void Tree::insert(Node** current, const std::string descendant, const std::string parent) {
     if (*current != nullptr) {
-        if ((*current)->name == descendant) { // Match found
+        if ((*current)->name == descendant) { // Match has found
             if (gender == FEMALE) {
-                if ((*current)->left == nullptr) { // Check mother's non-existence
+                if ((*current)->left == nullptr) { // Checks mother's non-existence
                     (*current)->left = new Node(parent);
                     (*current)->left->gender = FEMALE;
                     (*current)->left->height = 1 + (*current)->height;
@@ -176,7 +176,7 @@ void Tree::insert(Node** current, const std::string descendant, const std::strin
             }
 
             else {
-                if ((*current)->right == nullptr) { // Check father's non-existence
+                if ((*current)->right == nullptr) { // Checks father's non-existence
                     (*current)->right = new Node(parent);
                     (*current)->right->gender = MALE;
                     (*current)->right->height = 1 + (*current)->height;
@@ -195,12 +195,12 @@ void Tree::insert(Node** current, const std::string descendant, const std::strin
 
 void Tree::traversal(const Node* current) const {
     if (current != nullptr) {
-        // Print the specified node and it's parents names
+        // Prints the specified node and it's parents names
         std::cout << current->name << std::endl;
         if (current->left != nullptr) std::cout << "Mother's name is " + current->left->name << std::endl;
-        else std::cout << "Mother's name is unknown" << std::endl; // Print unknown in case of non-existence
+        else std::cout << "Mother's name is unknown" << std::endl; // Prints unknown in case of non-existence
         if (current->right != nullptr) std::cout << "Father's name is " + current->right->name << std::endl;
-        else std::cout << "Father's name is unknown" << std::endl; // Print unknown in case of non-existence
+        else std::cout << "Father's name is unknown" << std::endl; // Prints unknown in case of non-existence
         std::cout << std::endl;
 
         traversal(current->left);
@@ -212,7 +212,7 @@ const int Tree::length(const Node* current, const std::string name) const {
     if (current == nullptr) return -1;
 
     int len = -1;
-    if (current->name == name) { // Match found
+    if (current->name == name) { // Match has found
         if (current->gender == EMPTY) return 0; // Refers to the root
         if (current->gender == FEMALE) gender = FEMALE;
         else gender = MALE;

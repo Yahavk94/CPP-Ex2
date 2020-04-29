@@ -1,12 +1,12 @@
-#pragma once
-
-#include "Node.hpp"
-#include "Utils.hpp"
-
 /**
  * 04-2020
  * @author Yahav Karpel
  */
+
+#pragma once
+
+#include "Node.hpp"
+#include "Utils.hpp"
 
 namespace family {
     class Tree {
